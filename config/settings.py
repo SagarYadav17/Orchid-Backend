@@ -1,5 +1,5 @@
 from pathlib import Path
-from .__mixin import *
+from ._mixin import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     "social_django",
     "rest_framework_social_oauth2",
     # Apps
+    "core",
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -63,6 +65,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+
+
+AUTH_USER_MODEL = "users.User"
 
 
 # Database
@@ -142,6 +147,8 @@ AUTHENTICATION_BACKENDS = (
     "social_core.backends.github.GithubOAuth2",
     "social_core.backends.spotify.SpotifyOAuth2",
 )
+
+LOGIN_REDIRECT_URL = ".."
 
 SOCIAL_AUTH_GITHUB_KEY = GITHUB_KEY
 SOCIAL_AUTH_GITHUB_SECRET = GITHUB_SECRET

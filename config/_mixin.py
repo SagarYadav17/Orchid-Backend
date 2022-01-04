@@ -1,4 +1,7 @@
 from os import environ
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Social Tokens
 GITHUB_KEY = environ.get("GITHUB_KEY", "orchid")
