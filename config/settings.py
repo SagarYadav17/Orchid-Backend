@@ -5,7 +5,7 @@ from ._mixin import *
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-0p10lo00s_*fx%g0l5isyyfv_fk2+u!8^6xtn^@*6x-taqabq9"
+SECRET_KEY = DJANGO_SECRET_KEY
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -25,9 +25,6 @@ INSTALLED_APPS = [
     # Plugins
     "rest_framework",
     "corsheaders",
-    "oauth2_provider",
-    "social_django",
-    "rest_framework_social_oauth2",
     # Apps
     "core",
     "users",
@@ -40,6 +37,7 @@ MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.RemoteUserMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -122,36 +120,34 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# django-cors-headers
+CORS_ALLOW_ALL_ORIGINS = True
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "django.contrib.auth.backends.RemoteUserBackend",
+]
+
+# Auth0 settings
+# LINK: https://auth0.com/docs/quickstart/backend/django
 
 REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
-        "rest_framework_social_oauth2.authentication.SocialAuthentication",
+        "rest_framework_jwt.authentication.JSONWebTokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
 
-
-# django-cors-headers
-CORS_ALLOW_ALL_ORIGINS = True
-
-
-# Python Social Authentication
-# https://python-social-auth.readthedocs.io/en/latest/backends/index.html
-
-AUTHENTICATION_BACKENDS = (
-    "rest_framework_social_oauth2.backends.DjangoOAuth2",
-    "django.contrib.auth.backends.ModelBackend",
-    "social_core.backends.github.GithubOAuth2",
-    "social_core.backends.spotify.SpotifyOAuth2",
-)
-
-LOGIN_REDIRECT_URL = ".."
-
-SOCIAL_AUTH_GITHUB_KEY = GITHUB_KEY
-SOCIAL_AUTH_GITHUB_SECRET = GITHUB_SECRET
-
-SOCIAL_AUTH_SPOTIFY_KEY = SPOTIFY_KEY
-SOCIAL_AUTH_SPOTIFY_SECRET = SPOTIFY_SECRET
+JWT_AUTH = {
+    "JWT_PAYLOAD_GET_USERNAME_HANDLER": "auth0authorization.utils.jwt_get_username_from_payload_handler",
+    "JWT_DECODE_HANDLER": "auth0authorization.utils.jwt_decode_token",
+    "JWT_ALGORITHM": "RS256",
+    "JWT_AUDIENCE": AUTH0_API_IDENTIFIER,
+    "JWT_ISSUER": AUTH0_JWT_ISSUER,
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+}
